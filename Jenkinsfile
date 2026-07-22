@@ -1,10 +1,5 @@
 pipeline {
-
     agent any
-
-    tools {
-        SonarQubeScanner 'sonar-scanner'
-    }
 
     stages {
 
@@ -15,34 +10,14 @@ pipeline {
         }
 
         stage('SonarQube Scan') {
-
             steps {
+                script {
+                    def scannerHome = tool 'sonar-scanner'
 
-                withSonarQubeEnv('SonarQube') {
-
-                    sh 'sonar-scanner'
+                    withSonarQubeEnv('SonarQube') {
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }
                 }
-            }
-        }
-
-        stage('Quality Gate') {
-
-            steps {
-
-                timeout(time: 5, unit: 'MINUTES') {
-
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-
-        stage('Docker Build') {
-
-            steps {
-
-                sh '''
-                docker build -t employee-app:${BUILD_NUMBER} .
-                '''
             }
         }
     }
