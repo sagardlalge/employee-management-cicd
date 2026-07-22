@@ -45,5 +45,26 @@ pipeline {
                 '''
             }
         }
+
+        stage('Docker Push') {
+    steps {
+        withCredentials([
+            usernamePassword(
+                credentialsId: 'dockerhub',
+                usernameVariable: 'DOCKER_USER',
+                passwordVariable: 'DOCKER_PASS'
+            )
+        ]) {
+
+            sh '''
+            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+
+            docker tag employee-app:${BUILD_NUMBER} $DOCKER_USER/employee-app:${BUILD_NUMBER}
+
+            docker push $DOCKER_USER/employee-app:${BUILD_NUMBER}
+            '''
+        }
+    }
+}
     }
 }
