@@ -60,3 +60,34 @@ pipeline {
                     docker tag employee-app:${BUILD_NUMBER} $DOCKER_USER/employee-app:${BUILD_NUMBER}
                     docker tag employee-app:${BUILD_NUMBER} $DOCKER_USER/employee-app:latest
 
+                    docker push $DOCKER_USER/employee-app:${BUILD_NUMBER}
+                    docker push $DOCKER_USER/employee-app:latest
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy QA') {
+            steps {
+                sh '''
+                export KUBECONFIG=/var/lib/jenkins/.kube/config
+
+                kubectl apply -f kubernetes/ -n qa
+
+                kubectl get pods -n qa
+                '''
+            }
+        }
+    }
+
+    post {
+
+        success {
+            echo 'Pipeline completed successfully'
+        }
+
+        failure {
+            echo 'Pipeline failed'
+        }
+    }
+}
