@@ -68,6 +68,13 @@ pipeline {
                     '''
                 }
             }
+            stage('Deploy QA') {
+    steps {
+        sh '''
+        sudo kubectl apply -f kubernetes/ -n qa
+        '''
+    }
+}
         }
 
     }
