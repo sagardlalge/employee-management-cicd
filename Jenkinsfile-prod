@@ -1,1 +1,36 @@
+pipeline {
 
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Deploy PROD') {
+            steps {
+                sh '''
+                export KUBECONFIG=/var/lib/jenkins/.kube/config
+
+                kubectl apply -f kubernetes/ -n prod
+
+                kubectl rollout status deployment/employee-app -n prod
+                '''
+            }
+        }
+    }
+
+    post {
+
+        success {
+            echo 'Production deployment successful'
+        }
+
+        failure {
+            echo 'Production deployment failed'
+        }
+    }
+}
